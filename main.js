@@ -1,6 +1,11 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 import './style.css';
+import fragmentShader from './fragment.glsl'
+import vertexShader from './vertex.glsl'
+// import renderPass from './render/renderPass'
+
+console.log(fragmentShader);
 
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -27,31 +32,26 @@ let shaderMesh;
 
 loader.load("./models/tree.glb", (gltf) => {
   const model = gltf.scene
-  shaderMesh = model
+  shaderMesh = model.children[0]
   // console.log(model);
   scene.add(shaderMesh)
 })
 
-const boxGeometry = new THREE.PlaneGeometry(60,60,10,10);
+const boxGeometry = new THREE.PlaneGeometry(60,60,40,40);
 boxGeometry.rotateX(-Math.PI/2)
-const shaderMaterial = await (async function () {
-  const vertex = await (await fetch("./vertex.glsl")).text()
-  const fragment = await (await fetch("./fragment.glsl")).text()
-
-  // console.log(vertex, fragment);
-
+const shaderMaterial = ( function () {
   return new THREE.ShaderMaterial( {
     uniforms: {
       time: {value: 1.0}
     },
     wireframe: true,
-    vertexShader: vertex,
-    fragmentShader: fragment
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader
   });
 })();
 
 document.body.addEventListener("click", () => {
-  shaderMaterial.uniforms.time.value += 0.1;
+  camera.position.y += 1
 })
 
 setInterval(() => {
