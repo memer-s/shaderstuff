@@ -3,6 +3,7 @@ import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 import './style.css';
 import fragmentShader from './fragment.glsl'
 import vertexShader from './vertex.glsl'
+import text from './images.jpg'
 // import renderPass from './render/renderPass'
 
 console.log(fragmentShader);
@@ -10,6 +11,7 @@ console.log(fragmentShader);
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x212121, 1);
+// renderer.setClearColor(0xffffff, 1);
 
 document.body.appendChild(renderer.domElement);
 
@@ -26,36 +28,41 @@ const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHei
 camera.position.z = 50;
 scene.add(camera);
 
-const loader = new GLTFLoader();
+const modelLoader = new GLTFLoader();
 
 let shaderMesh;
 
-loader.load("./models/tree.glb", (gltf) => {
+modelLoader.load("./models/tree.glb", (gltf) => {
   const model = gltf.scene
   shaderMesh = model.children[0]
   // console.log(model);
   scene.add(shaderMesh)
 })
 
-const boxGeometry = new THREE.PlaneGeometry(60,60,40,40);
+let imageTexture;
+const imageLoader = new THREE.TextureLoader();
+
+
+// const boxGeometry = new THREE.PlaneGeometry(60,60,40,40);
+const boxGeometry = new THREE.TorusKnotGeometry(18,5,100,100)
 boxGeometry.rotateX(-Math.PI/2)
 const shaderMaterial = ( function () {
   return new THREE.ShaderMaterial( {
     uniforms: {
-      time: {value: 1.0}
+      time: {value: 1.0},
+      texture1: { type: 't', value: imageLoader.load(text)}
     },
-    wireframe: true,
+    wireframe: false,
     vertexShader: vertexShader,
-    fragmentShader: fragmentShader
+    fragmentShader: fragmentShader,
+    // transparent: true,
   });
 })();
 
-document.body.addEventListener("click", () => {
-  camera.position.y += 1
-})
 
 setInterval(() => {
   shaderMaterial.uniforms.time.value += 0.1;
+  cube.rotateY(0.01)
 }, 20)
 
 const cube = new THREE.Mesh(boxGeometry, shaderMaterial);
